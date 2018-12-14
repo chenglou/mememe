@@ -1,13 +1,29 @@
-type genericConfig = {
-  height: int,
-  width: int,
-  top: int,
-  left: int,
-  key: string,
-  component: ReasonReact.reactElement,
-};
+module Inner = {
+  type config = {
+    height: int,
+    width: int,
+    top: int,
+    left: int,
+    key: string,
+    component: ReasonReact.reactElement,
+  };
 
-type asd = list(genericConfig);
+  type changeSpec = int;
+  [@bs.deriving abstract]
+  type props = {
+    configs: list(config),
+    pat: list(config) => changeSpec,
+  };
+
+  let make = props => {
+    let configs = props->configs;
+    let pat = props->pat;
+    let (state, setState) = ReactHooks.useState(configs);
+    let components = Belt.List.map(configs, ({component}) => component);
+    Js.log("fuck");
+    <> {ReasonReact.array(components->Belt.List.toArray)} </>;
+  };
+};
 
 open Yoga;
 let root = node->create;
@@ -70,13 +86,12 @@ let draw = (layout, elem) => {
   <div style=s> elem </div>;
 };
 
-[@bs.deriving abstract]
-type props = {foo: string};
-
 let make = () => {
-  <>
-    /* {draw(rootLayout, ReasonReact.null)} */
-    {draw(child1Layout, ReasonReact.string("1"))}
-    {draw(child2Layout, ReasonReact.string("2"))}
-  </>;
+  /* <>
+       /* {draw(rootLayout, ReasonReact.null)} */
+       {draw(child1Layout, ReasonReact.string("1"))}
+       {draw(child2Layout, ReasonReact.string("2"))}
+     </>; */
+  let pat = _ => 1;
+  ReactHooks.createElement(Inner.make, Inner.props(~configs=[], ~pat));
 };
